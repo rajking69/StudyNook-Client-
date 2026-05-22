@@ -19,9 +19,10 @@ if (!uri) {
 }
 
 const mongoClient = new MongoClient(uri);
+const db = mongoClient.db(process.env.DB_NAME || "StudyNook");
 
 export const auth = betterAuth({
-  database: mongodbAdapter(mongoClient),
+  database: mongodbAdapter(db),
   baseURL,
   secret,
   trustedOrigins: [

@@ -39,10 +39,17 @@ export default function GoogleSignInButton({
     setLoading(true);
 
     try {
-      await authClient.signIn.social({
+      const result = await authClient.signIn.social({
         provider: "google",
         callbackURL: target,
       });
+      if (result?.error) {
+        toast(
+          result.error.message || "Google sign-in failed. Try again.",
+          "error"
+        );
+        setLoading(false);
+      }
     } catch (err) {
       toast(err?.message || "Google sign-in failed. Try again.", "error");
       setLoading(false);
