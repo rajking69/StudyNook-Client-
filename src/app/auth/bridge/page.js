@@ -2,33 +2,17 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getSession } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import api, { getErrorMessage } from "@/lib/api";
 import { useAuth } from "@/lib/AuthContext";
 import { useToast } from "@/lib/ToastContext";
+import { syncExpressSessionFromBetterAuth } from "@/lib/syncExpressSession";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function fetchNextAuthSession() {
-  const session = await getSession();
-  if (session?.user?.email) {
-    return session;
-  }
-
-  const res = await fetch("/api/auth/session", {
-    cache: "no-store",
-    credentials: "include",
-  });
-  if (!res.ok) {
-    return null;
-  }
-  const data = await res.json();
-  return data?.user?.email ? data : null;
-}
-
-async function waitForGoogleSession(maxAttempts = 20, delayMs = 300) {
+async function waitForBetterAuthSession(maxAttempts = 20, delayMs = 300) {
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    const session = await fetchNextAuthSession();
+    const { data: session } = await authClient.getSession();
     if (session?.user?.email) {
       return session;
     }
@@ -56,35 +40,31 @@ function AuthBridgeContent() {
 
     const run = async () => {
       try {
-        const session = await waitForGoogleSession();
+        setHint("Waiting for Better Auth session…");
+        const session = await waitForBetterAuthSession();
         if (cancelled) return;
 
         if (!session?.user?.email) {
           fail(
-            "Google session not ready. Sign in again or restart the dev server."
+            "Sign-in session not ready. Try again or restart the dev server."
           );
           return;
         }
 
-        setHint("Linking your account…");
-
-        const loginRes = await api.post("/auth/google", {
-          name: session.user.name || "Google User",
-          email: session.user.email,
-          photoURL: session.user.image || null,
-          uid: session.user.uid,
-        });
-
+        setHint("Generating JWT and API cookie…");
+        const { user } = await syncExpressSessionFromBetterAuth();
         if (cancelled) return;
 
-        setUser(loginRes.data);
+        setUser(user);
         setHint("Redirecting…");
         router.replace(redirectTo);
       } catch (err) {
         if (cancelled) return;
         const message = !err?.response
-          ? "Backend not reachable. Run: cd Server && npm run dev"
-          : getErrorMessage(err, "Google sign-in failed. Please try again.");
+          ? err?.message === "NO_SESSION"
+            ? "Better Auth session missing."
+            : "Backend not reachable. Run: cd Server && npm run dev"
+          : getErrorMessage(err, "Sign-in failed. Please try again.");
         fail(message);
       }
     };

@@ -7,8 +7,9 @@ import {
   useEffect,
   useState,
 } from "react";
-import { signOut } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import api from "@/lib/api";
+import { clearCachedBetterAuthJwt } from "@/lib/syncExpressSession";
 
 const AuthContext = createContext(null);
 
@@ -44,10 +45,11 @@ export function AuthProvider({ children }) {
       /* still clear local session */
     }
     try {
-      await signOut({ redirect: false });
+      await authClient.signOut();
     } catch (err) {
-      console.warn("NextAuth signOut:", err?.message || err);
+      console.warn("Better Auth signOut:", err?.message || err);
     }
+    clearCachedBetterAuthJwt();
     setUser(null);
   };
 

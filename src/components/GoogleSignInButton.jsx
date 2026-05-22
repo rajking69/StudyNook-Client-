@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { authClient } from "@/lib/auth-client";
 import { useToast } from "@/lib/ToastContext";
 
 function GoogleIcon() {
@@ -32,16 +32,21 @@ export default function GoogleSignInButton({
   const toast = useToast();
   const [loading, setLoading] = useState(false);
 
-  const target = callbackUrl || callbackURL || "/";
+  const target = callbackUrl || callbackURL || "/auth/bridge";
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     if (loading || disabled) return;
     setLoading(true);
-    // OAuth needs full-page redirect (redirect:false often breaks Google on Next.js)
-    signIn("google", { callbackUrl: target }).catch((err) => {
+
+    try {
+      await authClient.signIn.social({
+        provider: "google",
+        callbackURL: target,
+      });
+    } catch (err) {
       toast(err?.message || "Google sign-in failed. Try again.", "error");
       setLoading(false);
-    });
+    }
   };
 
   return (

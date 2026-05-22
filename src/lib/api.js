@@ -10,6 +10,22 @@ const api = axios.create({
   timeout: 10000,
 });
 
+/** Send Better Auth JWT when cached (backend verifies via JWKS). */
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    try {
+      const baJwt = sessionStorage.getItem("studynook_ba_jwt");
+      if (baJwt && !config.headers?.Authorization) {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${baJwt}`;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return config;
+});
+
 export const getErrorMessage = (error, fallback = "Something went wrong.") => {
   if (!error) return fallback;
   if (typeof error === "string") return error;

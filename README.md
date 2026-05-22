@@ -14,7 +14,7 @@ StudyNook is a full-stack study room booking platform. Students browse and reser
 
 - Browse and search rooms by name, floor, amenities, and hourly rate
 - Book time slots with live cost calculation and overlap prevention
-- JWT auth in HTTP-only cookies (email/password + Google OAuth)
+- JWT auth: Better Auth + JWT plugin, Express httpOnly cookie, Google OAuth
 - Owner dashboard: add, edit, delete listings; view booking counts
 - Personal bookings page with room images and cancel flow
 - Dark/light theme (saved in `localStorage`)
@@ -27,7 +27,7 @@ StudyNook is a full-stack study room booking platform. Students browse and reser
 |-------|--------|
 | Frontend | Next.js 16, React 19, Tailwind CSS 4, DaisyUI, Sonner, Framer Motion |
 | Backend | Node.js, Express 5, MongoDB |
-| Auth | JWT cookies + NextAuth (Google) |
+| Auth | Better Auth (JWT plugin) + Express JWT cookie |
 
 ## Local setup
 
@@ -46,7 +46,7 @@ node index.js
 cd studynook
 npm install
 cp .env.example .env.local
-# Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXTAUTH_SECRET
+# Set MONGODB_URI, BETTER_AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 npm run dev
 ```
 
@@ -57,10 +57,11 @@ Open [http://localhost:3000](http://localhost:3000). API is proxied at `/backend
 ```env
 NEXT_PUBLIC_API_BASE_URL=/backend
 API_INTERNAL_URL=http://localhost:5000
+MONGODB_URI=
+BETTER_AUTH_URL=http://localhost:3000
+BETTER_AUTH_SECRET=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-NEXTAUTH_SECRET=
-NEXTAUTH_URL=http://localhost:3000
 ```
 
 ## API routes (assignment-style)
