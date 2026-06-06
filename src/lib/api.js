@@ -35,10 +35,15 @@ export const getErrorMessage = (error, fallback = "Something went wrong.") => {
   if (typeof error === "string") return error;
 
   const responseMessage = error?.response?.data?.message;
-  if (responseMessage) return responseMessage;
+  if (responseMessage) {
+    // Guard: backend may return message as an object {code, message} — stringify it
+    if (typeof responseMessage === "string") return responseMessage;
+    if (typeof responseMessage?.message === "string") return responseMessage.message;
+    return fallback;
+  }
 
   const responseError = error?.response?.data?.error;
-  if (responseError) return responseError;
+  if (responseError && typeof responseError === "string") return responseError;
 
   if (error?.code === "ECONNABORTED") {
     return "Request timed out. Please try again.";
