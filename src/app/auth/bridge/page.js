@@ -27,7 +27,12 @@ function AuthBridgeContent() {
   const redirectTo = searchParams.get("redirect") || "/";
   const { setUser } = useAuth();
   const toast = useToast();
+  const [mounted, setMounted] = useState(false);
   const [hint, setHint] = useState("Securing your session…");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -82,10 +87,14 @@ function AuthBridgeContent() {
     };
   }, [redirectTo, router, setUser, toast]);
 
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <section className="mx-auto flex min-h-[60vh] w-full max-w-3xl items-center justify-center px-6 py-16">
       <div className="glass-card w-full rounded-3xl p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-[var(--sn-border)] bg-white/80">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full border border-(--sn-border) bg-white/80">
           <span className="loading loading-spinner loading-md" />
         </div>
         <h1 className="heading-font text-2xl">Finalizing your sign-in</h1>
@@ -100,7 +109,7 @@ export default function AuthBridgePage() {
     <Suspense
       fallback={
         <section className="mx-auto flex min-h-[60vh] w-full max-w-3xl items-center justify-center px-6 py-16">
-          <span className="loading loading-spinner loading-lg text-[var(--sn-teal)]" />
+          <span className="loading loading-spinner loading-lg text-(--sn-teal)" />
         </section>
       }
     >

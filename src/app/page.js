@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import api, { getErrorMessage } from "@/lib/api";
+import { FEATURED_ROOMS_FALLBACK } from "@/lib/mockRooms";
 
 function truncate(str, max = 95) {
   if (!str) return "A quiet, comfortable space perfect for focused study sessions.";
@@ -132,14 +133,14 @@ export default function Home() {
       })
       .catch((err) => {
         if (!alive) return;
-        setRooms([]);
+        setRooms(FEATURED_ROOMS_FALLBACK);
         setRoomLoadError(
           getErrorMessage(
             err,
-            "Could not connect to the room catalog. Make sure the backend is running on localhost:5000."
+            "Showing featured rooms while the catalog backend is unavailable."
           )
         );
-        setRoomStatus("error");
+        setRoomStatus("fallback");
       });
     return () => { alive = false; };
   }, []);
@@ -270,6 +271,12 @@ export default function Home() {
           </div>
         )}
 
+        {roomStatus === "fallback" && (
+          <div className="rounded-3xl border border-amber-200 bg-amber-50 px-6 py-5 text-sm text-amber-800">
+            {roomLoadError}
+          </div>
+        )}
+
         {roomStatus === "ok" && rooms.length === 0 && (
           <div className="glass-card rounded-3xl p-10 text-center text-sm text-soft">
             No rooms have been added yet.{" "}
@@ -279,7 +286,7 @@ export default function Home() {
           </div>
         )}
 
-        {roomStatus === "ok" && rooms.length > 0 && (
+        {(roomStatus === "ok" || roomStatus === "fallback") && rooms.length > 0 && (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {rooms.map((room, i) => (
               <HomeRoomCard key={room._id || room.id || i} room={room} index={i} />

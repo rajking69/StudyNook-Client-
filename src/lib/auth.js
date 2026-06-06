@@ -14,15 +14,11 @@ const secret =
   "dev-better-auth-secret-change-in-production-min-32-chars";
 
 const uri = process.env.MONGODB_URI;
-if (!uri) {
-  throw new Error("MONGODB_URI is required for Better Auth.");
-}
-
-const mongoClient = new MongoClient(uri);
-const db = mongoClient.db(process.env.DB_NAME || "StudyNook");
+const mongoClient = uri ? new MongoClient(uri) : null;
+const db = mongoClient?.db(process.env.DB_NAME || "StudyNook");
 
 export const auth = betterAuth({
-  database: mongodbAdapter(db),
+  ...(db ? { database: mongodbAdapter(db) } : {}),
   baseURL,
   secret,
   trustedOrigins: [

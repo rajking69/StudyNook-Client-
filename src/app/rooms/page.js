@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import api, { getErrorMessage } from "@/lib/api";
 import RoomCard from "@/components/RoomCard";
+import { FEATURED_ROOMS_FALLBACK } from "@/lib/mockRooms";
 
 const AMENITY_OPTIONS = [
   "Whiteboard",
@@ -71,11 +72,11 @@ export default function RoomsPage() {
       })
       .catch((err) => {
         if (!alive) return;
-        setRooms([]);
+        setRooms(FEATURED_ROOMS_FALLBACK);
         setError(
-          getErrorMessage(err, "Unable to load rooms. Please try again.")
+          getErrorMessage(err, "Showing featured rooms while the backend is unavailable.")
         );
-        setStatus("error");
+        setStatus("fallback");
       });
     return () => { alive = false; };
   }, [debouncedSearch, selectedAmenities, floor, minRate, maxRate]);
@@ -161,8 +162,8 @@ export default function RoomsPage() {
                   type="button"
                   onClick={() => toggleAmenity(amenity)}
                   className={`rounded-full border px-4 py-1.5 text-xs font-medium transition ${selected
-                      ? "border-[var(--sn-teal)] bg-[rgba(15,118,110,0.10)] text-[var(--sn-teal)]"
-                      : "border-[var(--sn-border)] bg-white text-[var(--sn-ink)] hover:border-[var(--sn-teal)]"
+                    ? "border-[var(--sn-teal)] bg-[rgba(15,118,110,0.10)] text-[var(--sn-teal)]"
+                    : "border-[var(--sn-border)] bg-white text-[var(--sn-ink)] hover:border-[var(--sn-teal)]"
                     }`}
                 >
                   {amenity}
@@ -210,13 +211,19 @@ export default function RoomsPage() {
         </div>
       )}
 
+      {status === "fallback" && (
+        <div className="rounded-3xl border border-amber-200 bg-amber-50 px-6 py-5 text-sm text-amber-800">
+          {error}
+        </div>
+      )}
+
       {status === "success" && rooms.length === 0 && (
         <div className="glass-card rounded-3xl p-10 text-center text-sm text-soft">
           No rooms found. Be the first to add one!
         </div>
       )}
 
-      {status === "success" && rooms.length > 0 && (
+      {(status === "success" || status === "fallback") && rooms.length > 0 && (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {rooms.map((room, i) => (
             <RoomCard key={room._id || i} room={room} index={i} />
