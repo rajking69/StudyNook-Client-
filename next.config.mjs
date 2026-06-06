@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
-const apiUrl = process.env.API_INTERNAL_URL || "http://localhost:5000";
+const apiUrl =
+  process.env.API_INTERNAL_URL ||
+  (process.env.VERCEL_ENV === "production"
+    ? "https://study-nook-server-peach.vercel.app"
+    : "http://localhost:5000");
 
 const nextConfig = {
   async rewrites() {
