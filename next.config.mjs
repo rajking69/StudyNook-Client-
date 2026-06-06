@@ -1,7 +1,9 @@
 /** @type {import('next').NextConfig} */
+const isVercel = !!process.env.VERCEL_ENV;
+
 const apiUrl =
   process.env.API_INTERNAL_URL ||
-  (process.env.VERCEL_ENV === "production"
+  (isVercel
     ? "https://study-nook-server-peach.vercel.app"
     : "http://localhost:5000");
 

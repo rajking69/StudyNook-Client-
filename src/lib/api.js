@@ -1,8 +1,19 @@
 import axios from "axios";
 
-const baseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  (typeof window !== "undefined" ? "/backend" : "http://localhost:5000");
+function resolveBaseURL() {
+  let url = process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (url) {
+    // Guard against env vars set without protocol (e.g. "study-nook-server-peach.vercel.app")
+    if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("/")) {
+      url = "https://" + url;
+    }
+    return url;
+  }
+  // No env var: use the Next.js rewrite proxy on the client, direct URL server-side
+  return typeof window !== "undefined" ? "/backend" : "http://localhost:5000";
+}
+
+const baseURL = resolveBaseURL();
 
 const api = axios.create({
   baseURL,
