@@ -1,19 +1,12 @@
 import axios from "axios";
 
-function resolveBaseURL() {
-  let url = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (url) {
-    // Guard against env vars set without protocol (e.g. "study-nook-server-peach.vercel.app")
-    if (!url.startsWith("http://") && !url.startsWith("https://") && !url.startsWith("/")) {
-      url = "https://" + url;
-    }
-    return url;
-  }
-  // No env var: use the Next.js rewrite proxy on the client, direct URL server-side
-  return typeof window !== "undefined" ? "/backend" : "http://localhost:5000";
-}
-
-const baseURL = resolveBaseURL();
+// On the browser: ALWAYS route through the Next.js /backend rewrite proxy.
+// This prevents CORS errors and keeps cookies working (same-origin to the browser).
+// On the server (SSR/RSC): call the backend directly via API_INTERNAL_URL.
+const baseURL =
+  typeof window !== "undefined"
+    ? "/backend"
+    : process.env.API_INTERNAL_URL || "http://localhost:5000";
 
 const api = axios.create({
   baseURL,
