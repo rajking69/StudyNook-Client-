@@ -7,7 +7,11 @@ const PRIVATE_PREFIXES = [
   "/dashboard",
 ];
 
-const apiBase = process.env.API_INTERNAL_URL || "http://localhost:5000";
+const apiBase =
+  process.env.API_INTERNAL_URL ||
+  (process.env.VERCEL_ENV
+    ? "https://study-nook-server-peach.vercel.app"
+    : "http://localhost:5000");
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
