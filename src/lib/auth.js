@@ -6,7 +6,7 @@ import { MongoClient } from "mongodb";
 const baseURL =
   process.env.BETTER_AUTH_URL ||
   process.env.NEXTAUTH_URL ||
-  "http://localhost:3000";
+  (typeof window !== "undefined" ? window.location.origin : undefined);
 
 const secret =
   process.env.BETTER_AUTH_SECRET ||
@@ -25,6 +25,7 @@ export const auth = betterAuth({
     baseURL,
     process.env.CLIENT_ORIGIN,
     "http://localhost:3000",
+    "https://studynook-psi.vercel.app",
   ].filter(Boolean),
   emailAndPassword: {
     enabled: true,
